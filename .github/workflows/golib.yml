@@ -43,7 +43,7 @@ jobs:
       env:
         GOTESTSUM_JSONFILE: gotestsum.json
     - name: Annotate Test Suite Results
-      if: always()
+      if: ${{ (success() || failure()) && hashFiles('gotestsum.json') != '' }}
       uses: guyarb/golang-test-annotations@v0.5.1
       with:
         test-results: gotestsum.json
