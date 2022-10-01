@@ -1,0 +1,12 @@
+on:
+  workflow_call:
+
+jobs:
+  call-lint:
+    name: Call Lint
+    uses: azazeal/workflows/.github/workflows/golint.yml@master
+
+  call-test:
+    name: Call Test
+    needs: call-lint
+    uses: azazeal/workflows/.github/workflows/gotest.yml@master

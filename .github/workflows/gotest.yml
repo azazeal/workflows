@@ -2,44 +2,24 @@ on:
   workflow_call:
 
 jobs:
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup Go
-        uses: actions/setup-go@v3
-        with:
-          go-version-file: go.mod
-          cache: true
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Configure Linter
-        if:  ${{ hashFiles('.golangci.yml', '.golangci.yaml', '.golangci.toml', '.golangci.json') == '' }}
-        run: |
-          curl -O https://raw.githubusercontent.com/azazeal/workflows/master/.golangci.yml
-      - name: Run Linter
-        uses: golangci/golangci-lint-action@v3
-        with:
-          version: v1.49
-
   test:
-    name: Test
-    needs: lint
+    name: Test (${{ matrix.os }})
     strategy:
       matrix:
         os: ['ubuntu', 'macos', 'windows']
     runs-on: ${{ matrix.os }}-latest
     steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
     - name: Install Go
       uses: actions/setup-go@v3
       with:
         go-version-file: go.mod
         cache: true
+        check-latest: true
     - name: Install gotestsum
       run: |
         go install gotest.tools/gotestsum@v1
-    - name: Checkout Code
-      uses: actions/checkout@v3
     - name: Run Test Suite
       run: |
         gotestsum -- -race -coverpkg=./... -coverprofile=coverprofile -covermode=atomic ./...
@@ -47,7 +27,7 @@ jobs:
         GOTESTSUM_JSONFILE: gotestsum.json
     - name: Annotate Test Suite Results
       if: ${{ (success() || failure()) && hashFiles('gotestsum.json') != '' }}
-      uses: guyarb/golang-test-annotations@v0
+      uses: guyarb/golang-test-annotations@v0.6.0
       with:
         test-results: gotestsum.json
     - name: Start Uploading Coverage Report
