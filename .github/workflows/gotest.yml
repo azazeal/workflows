@@ -11,7 +11,8 @@ jobs:
     steps:
     - name: Checkout Code
       uses: actions/checkout@v3
-    - name: Install Go
+    - name: Setup Go
+      id: setup-go
       uses: actions/setup-go@v3
       with:
         go-version-file: go.mod
@@ -34,7 +35,7 @@ jobs:
       uses: shogo82148/actions-goveralls@v1
       with:
         path-to-profile: coverprofile
-        flag-name: go${{ matrix.go }}-${{ matrix.os }}
+        flag-name: go${{ steps.setup-go.outputs.go-version }}-${{ matrix.os }}
         parallel: true
 
   finalize:
