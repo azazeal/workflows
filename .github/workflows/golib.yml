@@ -8,6 +8,9 @@ jobs:
     steps:
       - name: Setup Go
         uses: actions/setup-go@v3
+        with:
+          go-version-file: go.mod
+          cache: true
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Configure Linter
@@ -17,24 +20,24 @@ jobs:
       - name: Run Linter
         uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.48
+          version: v1.49
 
   test:
     name: Test
     needs: lint
     strategy:
       matrix:
-        go: ['1.18', '1.19']
         os: ['ubuntu', 'macos', 'windows']
     runs-on: ${{ matrix.os }}-latest
     steps:
     - name: Install Go
       uses: actions/setup-go@v3
       with:
-        go-version: ${{ matrix.go }}
+        go-version-file: go.mod
+        cache: true
     - name: Install gotestsum
       run: |
-        go install gotest.tools/gotestsum@v1.8.1
+        go install gotest.tools/gotestsum@v1
     - name: Checkout Code
       uses: actions/checkout@v3
     - name: Run Test Suite
@@ -44,7 +47,7 @@ jobs:
         GOTESTSUM_JSONFILE: gotestsum.json
     - name: Annotate Test Suite Results
       if: ${{ (success() || failure()) && hashFiles('gotestsum.json') != '' }}
-      uses: guyarb/golang-test-annotations@v0.5.1
+      uses: guyarb/golang-test-annotations@v0
       with:
         test-results: gotestsum.json
     - name: Start Uploading Coverage Report
