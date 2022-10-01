@@ -14,11 +14,13 @@ jobs:
           go-version-file: go.mod
           cache: true
           check-latest: true
-      - name: Configure Linter
+      - name: Install golangci-lint
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.49.0
+      - name: Download .golangci.yml
         if:  ${{ hashFiles('.golangci.yml', '.golangci.yaml', '.golangci.toml', '.golangci.json') == '' }}
         run: |
           curl -O https://raw.githubusercontent.com/azazeal/workflows/master/.golangci.yml
       - name: Run Linter
-        uses: golangci/golangci-lint-action@v3
-        with:
-          version: v1.49
+        run: |
+          golangci-lint run --out-format=github-actions
