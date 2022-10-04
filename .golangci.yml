@@ -8,7 +8,6 @@ linters:
   disable-all: true
   enable:
     # default linters
-    - deadcode
     - errcheck
     - gosimple
     - govet
@@ -16,7 +15,6 @@ linters:
     - staticcheck
     - typecheck
     - unused
-    - varcheck
 
     # non-default linters
     - asciicheck
@@ -31,8 +29,8 @@ linters:
     - gofmt
     - lll
     - nilerr
-    - nosnakecase
     - nosprintfhostport
+    - revive
     - tenv
     - thelper
     - unconvert
@@ -44,3 +42,27 @@ linters-settings:
   lll:
     line-length: 120
     tab-width: 4
+
+  revive:
+    ignore-generated-header: true
+    severity: error
+    rules:
+      - name: blank-imports
+      - name: context-as-argument
+      - name: context-keys-type
+      - name: dot-imports
+      - name: error-return
+      - name: error-naming
+        disabled: true # covered by errname
+      - name: error-strings
+      - name: if-return
+      - name: increment-decrement
+      - name: var-naming
+      - name: var-declaration
+      - name: package-comments
+      - name: range
+      - name: receiver-naming
+      - name: time-naming
+      - name: unexported-return
+      - name: indent-error-flow
+      - name: errorf
