@@ -29,6 +29,7 @@ linters:
     - gofmt
     - lll
     - nilerr
+    - nolintlint
     - nosprintfhostport
     - revive
     - tenv
@@ -39,9 +40,19 @@ linters:
     - whitespace
 
 linters-settings:
+  govet:
+    check-shadowing: true
+    enable-all: true
+    disable:
+      - fieldalignment
+
   lll:
     line-length: 120
     tab-width: 4
+
+  nolintlint:
+    require-explanation: true
+    require-specific: true
 
   revive:
     ignore-generated-header: true
