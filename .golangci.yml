@@ -27,6 +27,7 @@ linters:
     - errname
     - errorlint
     - gofmt
+    - gosec
     - lll
     - nilerr
     - nolintlint
