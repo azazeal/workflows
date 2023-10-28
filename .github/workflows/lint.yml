@@ -1,4 +1,4 @@
-name: Lint Github workflows
+name: Build
 
 on:
   push:
