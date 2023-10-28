@@ -1,12 +1,21 @@
+run-name: Build Go package
+
 on:
   workflow_call:
+    inputs:
+      go-version-file:
+        type: string
+        default: go.mod
+        description: Path to go.mod or go.work file
 
 jobs:
   call-lint:
-    name: Call Lint
     uses: azazeal/workflows/.github/workflows/golint.yml@master
+    with:
+      go-version-file: ${{ inputs.go-version-file }}
 
   call-test:
-    name: Call Test
     needs: call-lint
     uses: azazeal/workflows/.github/workflows/gotest.yml@master
+    with:
+      go-version-file: ${{ inputs.go-version-file }}

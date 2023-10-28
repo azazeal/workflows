@@ -1,0 +1,23 @@
+name: Lint Github workflows
+
+on:
+  push:
+    tags-ignore:
+      - "**"
+    branches:
+      - master
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  call-ghlint:
+    name: Call Lint Github workflows
+    uses: ./.github/workflows/ghlint.yml
+    permissions:
+      pull-requests: write # required in order to annotate a PR with comments
