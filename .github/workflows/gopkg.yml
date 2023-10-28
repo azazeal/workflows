@@ -10,11 +10,13 @@ on:
 
 jobs:
   call-lint:
+    name: Call Lint Go package
     uses: azazeal/workflows/.github/workflows/golint.yml@master
     with:
       go-version-file: ${{ inputs.go-version-file }}
 
   call-test:
+    name: Call Test Go package
     needs: call-lint
     uses: azazeal/workflows/.github/workflows/gotest.yml@master
     with:
