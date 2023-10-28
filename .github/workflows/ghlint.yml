@@ -1,0 +1,18 @@
+name: Lint Github workflows
+
+on:
+  workflow_call:
+
+jobs:
+  lint:
+    name: Lint Github workflows
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write # required in order to annotate a PR with comments
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Lint workflows
+        uses: devops-actions/actionlint@48ca80d7da4ffd5ed31b7981702bc6bb4b242c63 #v0.1.2

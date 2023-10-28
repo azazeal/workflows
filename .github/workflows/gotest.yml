@@ -1,49 +1,63 @@
+run-name: Test Go package
+
 on:
   workflow_call:
+    inputs:
+      go-version-file:
+        type: string
+        default: go.mod
+        description: Path to go.mod or go.work file
 
 jobs:
   test:
-    name: Test (${{ matrix.os }})
+    name: Test Go package (${{ matrix.os }})
     strategy:
       matrix:
         os: ['ubuntu', 'macos', 'windows']
     runs-on: ${{ matrix.os }}-latest
+
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v3
-    - name: Setup Go
-      id: setup-go
-      uses: actions/setup-go@v3
-      with:
-        go-version-file: go.mod
-        cache: true
-        check-latest: true
-    - name: Install gotestsum
-      run: |
-        go install gotest.tools/gotestsum@v1
-    - name: Run Test Suite
-      run: |
-        gotestsum -- -race -coverpkg=./... -coverprofile=coverprofile -covermode=atomic ./...
-      env:
-        GOTESTSUM_JSONFILE: gotestsum.json
-    - name: Annotate Test Suite Results
-      if: ${{ (success() || failure()) && hashFiles('gotestsum.json') != '' }}
-      uses: guyarb/golang-test-annotations@v0.6.0
-      with:
-        test-results: gotestsum.json
-    - name: Start Uploading Coverage Report
-      uses: shogo82148/actions-goveralls@v1
-      with:
-        path-to-profile: coverprofile
-        flag-name: go${{ steps.setup-go.outputs.go-version }}-${{ matrix.os }}
-        parallel: true
+      - name: Checkout code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          submodules: recursive
+
+      - name: Setup Go
+        id: setup-go
+        uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # v4.1.0
+        with:
+          go-version-file: ${{ inputs.go-version-file }}
+          check-latest: true
+
+      - name: Install gotestsum
+        run: |
+          go install gotest.tools/gotestsum@v1
+
+      - name: Run test suite
+        run: |
+          gotestsum -- -race -coverpkg=./... -coverprofile=coverprofile -covermode=atomic ./...
+        env:
+          GOTESTSUM_JSONFILE: gotestsum.json
+
+      - name: Annotate test suite results
+        if: ${{ (success() || failure()) && hashFiles('gotestsum.json') != '' }}
+        uses: guyarb/golang-test-annotations@a7869d394e8879bfc2e5dba4f1ea8bbb77a74f59 # v0.7.0
+        with:
+          test-results: gotestsum.json
+
+      - name: Upload coverage report
+        uses: shogo82148/actions-goveralls@v1
+        with:
+          path-to-profile: coverprofile
+          flag-name: go${{ steps.setup-go.outputs.go-version }}-${{ matrix.os }}
+          parallel: true
 
   finalize:
     name: Finalize
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - name: Finalize Uploading Coverage Report
+      - name: Finalize coverage report uploads
         uses: shogo82148/actions-goveralls@v1
         with:
           parallel-finished: true
