@@ -3,21 +3,44 @@ run-name: Build Go package
 on:
   workflow_call:
     inputs:
+
+      # common inputs
+
       go-version-file:
         type: string
         default: go.mod
         description: Path to go.mod or go.work file
 
+      # gotest specific inputs
+
+      disable-macos-tests:
+        type: boolean
+        default: false
+        description: Disable the MacOS tests' target
+
+      disable-ubuntu-tests:
+        type: boolean
+        default: false
+        description: Disable the Ubuntu tests' target
+
+      disable-windows-tests:
+        type: boolean
+        default: false
+        description: Disable the Windows tests' target
+
 jobs:
-  call-lint:
+  call-golint:
     name: Call Lint Go package
     uses: azazeal/workflows/.github/workflows/golint.yml@master
     with:
       go-version-file: ${{ inputs.go-version-file }}
 
-  call-test:
+  call-gotest:
     name: Call Test Go package
-    needs: call-lint
+    needs: call-golint
     uses: azazeal/workflows/.github/workflows/gotest.yml@master
     with:
       go-version-file: ${{ inputs.go-version-file }}
+      disable-macos: ${{ inputs.disable-macos-tests }}
+      disable-ubuntu: ${{ inputs.disable-ubuntu-tests }}
+      disable-windows: ${{ inputs.disable-windows-tests }}

@@ -15,4 +15,8 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Lint workflows
-        uses: devops-actions/actionlint@48ca80d7da4ffd5ed31b7981702bc6bb4b242c63 #v0.1.2
+        uses: docker://rhysd/actionlint:1.6.26
+        with:
+          args: >-
+            -color
+            -ignore "value \"true\" in \"exclude\" does not match in matrix \"disabled\" combinations"
