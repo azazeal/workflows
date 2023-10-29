@@ -31,14 +31,14 @@ on:
 jobs:
   call-golint:
     name: Call Lint Go package
-    uses: azazeal/workflows/.github/workflows/golint.yml@master
+    uses: ./.github/workflows/golint.yml
     with:
       go-version-file: ${{ inputs.go-version-file }}
 
   call-gotest:
     name: Call Test Go package
     needs: call-golint
-    uses: azazeal/workflows/.github/workflows/gotest.yml@master
+    uses: ./.github/workflows/gotest.yml
     with:
       go-version-file: ${{ inputs.go-version-file }}
       disable-macos: ${{ inputs.disable-macos-tests }}
