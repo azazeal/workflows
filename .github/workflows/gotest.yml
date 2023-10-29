@@ -23,6 +23,11 @@ on:
         default: false
         description: Disable running tests on the Windows O/S
 
+      disable-coverage-upload:
+        type: boolean
+        default: false
+        description: Disable uploading the coverage report
+
 jobs:
   targets:
     name: Determine O/Ses
@@ -88,6 +93,7 @@ jobs:
           test-results: gotestsum.json
 
       - name: Upload coverage to Coveralls (parallel)
+        if: ${{ ! inputs.disable-coverage-upload }}
         uses: shogo82148/actions-goveralls@v1
         with:
           parallel: true
@@ -95,8 +101,9 @@ jobs:
           flag-name: go${{ steps.setup-go.outputs.go-version }}-${{ matrix.os }}
 
   finalize:
-    name: Finalize
+    name: Finalize Coveralls coverage uploads
     needs: test
+    if: ${{ ! inputs.disable-coverage-upload }}
     runs-on: ubuntu-latest
     steps:
       - name: Finalize coverage report uploads
