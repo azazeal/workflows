@@ -11,7 +11,18 @@ on:
         default: go.mod
         description: Path to go.mod or go.work file
 
+      # golint specific inputs
+      disable-linter:
+        type: boolean
+        default: false
+        description: Disable running the linter
+
       # gotest specific inputs
+
+      disable-tests:
+        type: boolean
+        default: false
+        description: Disable running the test suite
 
       disable-macos-tests:
         type: boolean
@@ -28,19 +39,27 @@ on:
         default: false
         description: Disable running tests on the Windows O/S
 
+      disable-coverage-upload:
+        type: boolean
+        default: false
+        description: Disable uploading the coverage report
+
 jobs:
   call-golint:
     name: Call Lint Go package
     uses: ./.github/workflows/golint.yml
+    if: ${{ ! inputs.disable-linter }}
     with:
       go-version-file: ${{ inputs.go-version-file }}
 
   call-gotest:
     name: Call Test Go package
     needs: call-golint
+    if: ${{ ! inputs.disable-tests }}
     uses: ./.github/workflows/gotest.yml
     with:
       go-version-file: ${{ inputs.go-version-file }}
       disable-macos: ${{ inputs.disable-macos-tests }}
       disable-ubuntu: ${{ inputs.disable-ubuntu-tests }}
       disable-windows: ${{ inputs.disable-windows-tests }}
+      disable-coverage-upload: ${{ inputs.disable-coverage-upload }}
