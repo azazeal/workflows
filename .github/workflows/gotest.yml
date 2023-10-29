@@ -11,34 +11,52 @@ on:
       disable-macos:
         type: boolean
         default: false
-        description: Disable the MacOS tests' target
+        description: Disable running tests on the MacOS O/S
 
       disable-ubuntu:
         type: boolean
         default: false
-        description: Disable the Ubuntu tests' target
+        description: Disable running tests on the Ubuntu O/S
 
       disable-windows:
         type: boolean
         default: false
-        description: Disable the Windows tests' target
+        description: Disable running tests on the Windows O/S
 
 jobs:
+  targets:
+    name: Determine O/Ses
+    runs-on: ubuntu-latest
+    outputs:
+      json: ${{ steps.determine.outputs.json }}
+
+    steps:
+      - name: Determine O/Ses
+        id: determine
+        run: |
+          TARGETS=[]
+
+          if ! ${{ inputs.disable-macos }}; then
+            TARGETS=$(echo "${TARGETS}" | jq -c '. + [ "macos" ]')
+          fi
+
+          if ! ${{ inputs.disable-ubuntu }}; then
+            TARGETS=$(echo "${TARGETS}" | jq -c '. + [ "ubuntu" ]')
+          fi
+
+          if ! ${{ inputs.disable-windows }}; then
+            TARGETS=$(echo "${TARGETS}" | jq -c '. + [ "windows" ]')
+          fi
+
+          echo json="${TARGETS}" >> "${GITHUB_OUTPUT}"
+
   test:
     name: Test Go package (${{ matrix.os }})
     runs-on: ${{ matrix.os }}-latest
-
+    needs: targets
     strategy:
       matrix:
-        include:
-          - os: macos
-            disabled: ${{ inputs.disable-macos }}
-          - os: ubuntu
-            disabled: ${{ inputs.disable-ubuntu }}
-          - os: windows
-            disabled: ${{ inputs.disable-windows }}
-        exclude:
-          - disabled: true
+        os: ${{ fromJson(needs.targets.outputs.json) }}
 
     steps:
       - name: Checkout code
@@ -69,12 +87,12 @@ jobs:
         with:
           test-results: gotestsum.json
 
-      - name: Upload coverage report
+      - name: Upload coverage to Coveralls (parallel)
         uses: shogo82148/actions-goveralls@v1
         with:
+          parallel: true
           path-to-profile: coverprofile
           flag-name: go${{ steps.setup-go.outputs.go-version }}-${{ matrix.os }}
-          parallel: true
 
   finalize:
     name: Finalize

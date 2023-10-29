@@ -16,17 +16,17 @@ on:
       disable-macos-tests:
         type: boolean
         default: false
-        description: Disable the MacOS tests' target
+        description: Disable running tests on the MacOS O/S
 
       disable-ubuntu-tests:
         type: boolean
         default: false
-        description: Disable the Ubuntu tests' target
+        description: Disable running tests on the Ubuntu O/S
 
       disable-windows-tests:
         type: boolean
         default: false
-        description: Disable the Windows tests' target
+        description: Disable running tests on the Windows O/S
 
 jobs:
   call-golint:
