@@ -2,38 +2,42 @@ run-name: Lint Go package
 
 on:
   workflow_call:
-    inputs:
-      go-version-file:
-        type: string
-        default: go.mod
-        description: Path to go.mod or go.work file
 
 jobs:
   lint:
     name: Lint Go package
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout the workflows repository
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
-          submodules: recursive
+          path: workflows
+          ref: master
+          repository: azazeal/workflows
 
-      - name: Setup Go
+      - name: Setup go
         uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # v4.1.0
         with:
-          go-version-file: ${{ inputs.go-version-file }}
+          go-version-file: workflows/go/go.mod
+          cache-dependency-path: workflows/go/go.sum
           check-latest: true
 
-      - name: Download .golangci.yml (if required)
-        if:  ${{ hashFiles('.golangci.yml', '.golangci.yaml', '.golangci.toml', '.golangci.json') == '' }}
-        env:
-          URL: https://raw.githubusercontent.com/azazeal/workflows/master/.golangci.yml
-        run: curl -O "${URL}"
-
       - name: Install golangci-lint
-        env:
-          URL: https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh
-        run: curl -sSfL "${URL}" | sh -s -- -b "$(go env GOPATH)/bin" latest
+        working-directory: workflows/go
+        run: |
+          go install -mod=readonly github.com/golangci/golangci-lint/cmd/golangci-lint
+
+      - name: Checkout the source repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          path: src
+          submodules: recursive
+
+      - name: Copy .golangci.yml (if required)
+        working-directory: src
+        if:  ${{ hashFiles('.golangci.yml', '.golangci.yaml', '.golangci.toml', '.golangci.json') == '' }}
+        run: cp ../workflows/.golangci.yml .
 
       - name: Run Linter
+        working-directory: src
         run: golangci-lint run --out-format=github-actions
