@@ -7,8 +7,6 @@ jobs:
   lint:
     name: Lint Github workflows
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write # required in order to annotate a PR with comments
 
     steps:
       - name: Checkout code
