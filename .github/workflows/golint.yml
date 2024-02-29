@@ -3,6 +3,7 @@ run-name: Lint Go package
 on:
   workflow_call:
 
+
 jobs:
   lint:
     name: Lint Go package
@@ -24,8 +25,7 @@ jobs:
 
       - name: Install golangci-lint
         working-directory: workflows/go
-        run: |
-          go install -mod=readonly github.com/golangci/golangci-lint/cmd/golangci-lint
+        run: go install -mod=readonly github.com/golangci/golangci-lint/cmd/golangci-lint
 
       - name: Checkout the source repository
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
