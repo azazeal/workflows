@@ -1,20 +1,45 @@
-name: Lint Github workflows
+name: Lint workflows
 
 on:
   workflow_call:
+    inputs:
+      ref:
+        type: string
+        default: master
+        required: false
+        description: The git REF (or SHA) of the workflow to use.
 
 jobs:
   lint:
-    name: Lint Github workflows
+    name: Lint workflows
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout the workflows repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          path: workflows
+          ref: ${{ inputs.ref }}
+          repository: azazeal/workflows
+
+      - name: Setup Go
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version-file: workflows/go/go.mod
+          cache-dependency-path: workflows/go/go.sum
+          check-latest: true
+
+      - name: Install actionlint
+        working-directory: workflows/go
+        run: |
+          go install -mod=readonly github.com/rhysd/actionlint/cmd/actionlint
+
       - name: Checkout code
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-
-      - name: Lint workflows
-        uses: docker://rhysd/actionlint:1.6.26
         with:
-          args: >-
-            -color
-            -ignore "value \"true\" in \"exclude\" does not match in matrix \"disabled\" combinations"
+          submodules: recursive
+
+      - name: Run the linter
+        run: |
+          echo "::add-matcher::.github/actionlint-matcher.json"
+          actionlint -color

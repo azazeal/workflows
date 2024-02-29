@@ -19,7 +19,9 @@ concurrency:
 
 jobs:
   call-ghlint:
-    name: Call Lint Github workflows
+    name: Call Lint workflows
     uses: ./.github/workflows/ghlint.yml
     permissions:
       pull-requests: write # required in order to annotate a PR with comments
+    with:
+      ref: ${{ github.sha }}
