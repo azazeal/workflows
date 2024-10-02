@@ -1,7 +1,8 @@
 module github.com/azazeal/workflows/go
 
-go 1.21
-toolchain go1.22.5
+go 1.22.1
+
+toolchain go1.22.6
 
 require github.com/golangci/golangci-lint v1.61.0
 
