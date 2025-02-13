@@ -25,13 +25,13 @@ on:
 
 jobs:
   targets:
-    name: Determine O/Ses
+    name: Determine Lint O/Ses
     runs-on: ubuntu-latest
     outputs:
       json: ${{ steps.determine.outputs.json }}
 
     steps:
-      - name: Determine O/Ses
+      - name: Determine
         id: determine
         run: |
           TARGETS=[]
