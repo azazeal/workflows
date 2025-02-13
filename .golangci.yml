@@ -10,15 +10,17 @@ linters:
     - govet
     - ineffassign
     - staticcheck
-    - typecheck
     - unused
 
     # non-default linters
+    - asasalint
     - asciicheck
     - bidichk
     - bodyclose
+    - canonicalheader
     - containedctx
     - contextcheck
+    - copyloopvar
     - dupl
     - errchkjson
     - errname
@@ -30,14 +32,17 @@ linters:
     - nolintlint
     - nosprintfhostport
     - revive
-    - tenv
     - thelper
     - unconvert
     - unparam
+    - usetesting
     - wastedassign
     - whitespace
 
 linters-settings:
+  copyloopvar:
+    check-alias: true
+
   govet:
     enable-all: true
     disable:

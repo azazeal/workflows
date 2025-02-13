@@ -89,6 +89,9 @@ jobs:
         if:  ${{ hashFiles('.golangci.yml', '.golangci.yaml', '.golangci.toml', '.golangci.json') == '' }}
         run: cp ../workflows/.golangci.yml .
 
+      - name: Verify .golangci.yml
+        run: golangci-lint config verify -v
+
       - name: Run Linter
         working-directory: src
         run: golangci-lint run --out-format colored-line-number ./...

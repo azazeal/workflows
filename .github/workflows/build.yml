@@ -22,8 +22,8 @@ jobs:
     permissions:
       pull-requests: write # required in order to annotate a PR with comments
 
-  verify-linter-config:
-    name: Verify golangci-lint config
+  golangci-lint:
+    name: Verify .golangci.yml
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -35,11 +35,11 @@ jobs:
           go-version-file: go/go.mod
           check-latest: true
 
-      - name: Install the golangci-lint binary
+      - name: Install golangci-lint
         run: |
           curl -sSfL "https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh" | sh -s -- -b "$(go env GOPATH)/bin" v1.64.4
 
-      - name: Lint the linter's configuration file
+      - name: Verify .golangci.yml
         run: golangci-lint config verify -v --config .golangci.yml
 
       - name: Lint the dummy application
