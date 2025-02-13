@@ -3,6 +3,11 @@ run-name: Build Go package
 on:
   workflow_call:
     inputs:
+      go-version-file:
+        type: string
+        default: go.mod
+        description: Path to go.mod or go.work file
+
       # golint specific inputs
 
       disable-linter:
@@ -10,12 +15,22 @@ on:
         default: false
         description: Disable running the linter
 
-      # gotest specific inputs
+      disable-macos-linter:
+        type: boolean
+        default: false
+        description: Disable running the linter on the MacOS O/S
 
-      go-version-file:
-        type: string
-        default: go.mod
-        description: Path to go.mod or go.work file
+      disable-ubuntu-linter:
+        type: boolean
+        default: false
+        description: Disable running the linter on the Ubuntu O/S
+
+      disable-windows-linter:
+        type: boolean
+        default: false
+        description: Disable running the linter on the Windows O/S
+
+      # gotest specific inputs
 
       disable-tests:
         type: boolean
@@ -47,6 +62,11 @@ jobs:
     name: Call Lint Go package
     uses: ./.github/workflows/golint.yml
     if: ${{ ! inputs.disable-linter }}
+    with:
+      go-version-file: ${{ inputs.go-version-file }}
+      disable-macos: ${{ inputs.disable-macos-linter }}
+      disable-ubuntu: ${{ inputs.disable-ubuntu-linter }}
+      disable-windows: ${{ inputs.disable-windows-linter }}
 
   call-gotest:
     name: Call Test Go package
