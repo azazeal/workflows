@@ -2,11 +2,62 @@ run-name: Lint Go package
 
 on:
   workflow_call:
+    inputs:
+      go-version-file:
+        type: string
+        default: go.mod
+        description: Path to go.mod or go.work file
+
+      disable-macos:
+        type: boolean
+        default: false
+        description: Disable running the linter on the MacOS O/S
+
+      disable-ubuntu:
+        type: boolean
+        default: false
+        description: Disable running the linter on the Ubuntu O/S
+
+      disable-windows:
+        type: boolean
+        default: false
+        description: Disable running the linter on the Windows O/S
 
 jobs:
-  lint:
-    name: Lint Go package
+  targets:
+    name: Determine O/Ses
     runs-on: ubuntu-latest
+    outputs:
+      json: ${{ steps.determine.outputs.json }}
+
+    steps:
+      - name: Determine O/Ses
+        id: determine
+        run: |
+          TARGETS=[]
+
+          if ! ${{ inputs.disable-macos }}; then
+            TARGETS=$(echo "${TARGETS}" | jq -c '. + [ "macos" ]')
+          fi
+
+          if ! ${{ inputs.disable-ubuntu }}; then
+            TARGETS=$(echo "${TARGETS}" | jq -c '. + [ "ubuntu" ]')
+          fi
+
+          if ! ${{ inputs.disable-windows }}; then
+            TARGETS=$(echo "${TARGETS}" | jq -c '. + [ "windows" ]')
+          fi
+
+          echo json="${TARGETS}" >> "${GITHUB_OUTPUT}"
+
+  lint:
+    name: Lint Go package (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}-latest
+    needs: targets
+    strategy:
+      matrix:
+        os: ${{ fromJson(needs.targets.outputs.json) }}
+
     steps:
       - name: Checkout the workflows repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -15,23 +66,23 @@ jobs:
           ref: master
           repository: azazeal/workflows
 
-      - name: Setup go
+      - name: Checkout the source repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          path: src
+          submodules: recursive
+
+      - name: Setup Go
         uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5.3.0
         with:
-          go-version-file: workflows/go/go.mod
+          go-version-file: src/${{ inputs.go-version-file }}
           cache-dependency-path: workflows/go/go.sum
           check-latest: true
 
       - name: Install golangci-lint
         working-directory: workflows/go
         run: |
-          go install -mod=readonly github.com/golangci/golangci-lint/cmd/golangci-lint
-
-      - name: Checkout the source repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          path: src
-          submodules: recursive
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.64.4
 
       - name: Copy .golangci.yml (if required)
         working-directory: src
@@ -40,4 +91,4 @@ jobs:
 
       - name: Run Linter
         working-directory: src
-        run: golangci-lint run --out-format=github-actions
+        run: golangci-lint run --out-format github-actions ./...
