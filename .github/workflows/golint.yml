@@ -91,6 +91,7 @@ jobs:
         run: cp ../workflows/.golangci.yml .
 
       - name: Verify .golangci.yml
+        working-directory: src
         run: golangci-lint config verify -v
 
       - name: Run Linter
